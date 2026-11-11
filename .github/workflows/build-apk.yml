@@ -53,6 +53,8 @@ jobs:
           if [ -n "$APP_GRADLE" ]; then
             printf '\nandroid {\n    kotlinOptions {\n        jvmTarget = "1.8"\n    }\n}\n' >> "$APP_GRADLE"
           fi
+          find . -type f -name "*.kt" -exec sed -i 's/^package in\./package `in`./g' {} +
+          find . -type f -name "*.kt" -exec sed -i 's/^import in\./import `in`./g' {} +
           gradle assembleDebug
 
       - name: Upload APK
