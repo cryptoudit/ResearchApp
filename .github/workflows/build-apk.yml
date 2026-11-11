@@ -25,6 +25,11 @@ jobs:
         with:
           packages: 'platform-tools'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
       - name: Extract ChatGPT ZIP
         run: |
           ZIP=$(find . -maxdepth 2 -type f -iname "*.zip" | head -n 1)
@@ -37,14 +42,13 @@ jobs:
 
       - name: Build APK
         run: |
-          GRADLEW=$(find extracted -type f -name gradlew -print -quit)
-          if [ -z "$GRADLEW" ]; then
-            echo "Gradle wrapper not found in ZIP"
+          ROOT_FILE=$(find extracted -type f -name "settings.gradle.kts" | head -n 1)
+          if [ -z "$ROOT_FILE" ]; then
+            echo "settings.gradle.kts not found in ZIP"
             exit 1
           fi
-          cd "$(dirname "$GRADLEW")"
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          cd "$(dirname "$ROOT_FILE")"
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
