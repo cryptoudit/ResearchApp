@@ -42,29 +42,17 @@ jobs:
 
       - name: Build APK
         run: |
-          ROOT_FILE=$(find extracted -type f -name "settings.gradle.kts" -o -name "settings.gradle" | head -n 1)
+          ROOT_FILE=$(find extracted -type f \( -name "settings.gradle.kts" -o -name "settings.gradle" \) | head -n 1)
           if [ -z "$ROOT_FILE" ]; then
             echo "settings.gradle.kts not found in ZIP"
             exit 1
           fi
           cd "$(dirname "$ROOT_FILE")"
-
-          # 1. Validation error ko bypass karne ke liye
           echo "kotlin.jvm.target.validation.mode=warning" >> gradle.properties
-
-          # 2. Kotlin JVM target ko Java (1.8) ke sath match karne ke liye
           APP_GRADLE=$(find . -type f \( -name "build.gradle.kts" -o -name "build.gradle" \) -path "*/app/*" | head -n 1)
           if [ -n "$APP_GRADLE" ]; then
-            cat << 'EOF' >> "$APP_GRADLE"
-
-android {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-EOF
+            printf '\nandroid {\n    kotlinOptions {\n        jvmTarget = "1.8"\n    }\n}\n' >> "$APP_GRADLE"
           fi
-
           gradle assembleDebug
 
       - name: Upload APK
